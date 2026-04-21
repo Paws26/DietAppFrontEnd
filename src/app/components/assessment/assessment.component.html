@@ -1,0 +1,330 @@
+<div style="padding:24px;max-width:820px;">
+
+  <h2>Assessment</h2>
+  <p style="color:#666;font-size:13px;">Fall-ID: <code>{{ fallId }}</code></p>
+
+  <!-- Schritt-Anzeige -->
+  <!-- <div style="display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;">
+    <span *ngFor="let s of schritte; let i = index"
+          [style.fontWeight]="schritt===i ? 'bold' : 'normal'"
+          [style.color]="schritt===i ? '#1976d2' : (schritt>i ? '#27ae60' : '#999')"
+          style="font-size:14px;">
+      {{ schritt > i ? '✓' : (i+1) + '.' }} {{ s }}
+      <span *ngIf="i < schritte.length-1" style="color:#ccc;margin-left:8px;">→</span>
+    </span>
+  </div> -->
+
+  <!-- Schritt-Anzeige - NOW CLICKABLE -->
+<div style="display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;">
+  <span *ngFor="let s of schritte; let i = index"
+        (click)="goToStep(i)"
+        style="cursor: pointer; font-size:14px; padding: 8px 12px; border-radius: 20px;"
+        [style.background]="schritt===i ? '#1976d2' : (schritt>i ? '#e8f5e9' : '#f5f5f5')"
+        [style.color]="schritt===i ? 'white' : (schritt>i ? '#27ae60' : '#666')"
+        [style.fontWeight]="schritt===i ? 'bold' : 'normal'">
+    {{ schritt > i ? '✓' : (i+1) + '.' }} {{ s }}
+    <span *ngIf="i < schritte.length-1" style="margin-left:8px;">→</span>
+  </span>
+</div>
+
+  <!-- SCHRITT 0: ALLGEMEIN -->
+  <div *ngIf="schritt === 0">
+    <form [formGroup]="allgemeinForm">
+      <h3>Allgemeines Assessment</h3>
+
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
+        <mat-form-field appearance="outline">
+          <mat-label>Muedigkeit</mat-label>
+          <mat-select formControlName="muedigkeitLevel">
+            <mat-option *ngFor="let o of muedigkeitOpt" [value]="o">{{ o }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Wissen Ernaehrung</mat-label>
+          <mat-select formControlName="wissenErnaehrungLevel">
+            <mat-option *ngFor="let o of wissenOpt" [value]="o">{{ o }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Motivation</mat-label>
+          <mat-select formControlName="motivationLevel">
+            <mat-option *ngFor="let o of motivationOpt" [value]="o">{{ o }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-checkbox formControlName="kopfschmerzen" style="margin-bottom:16px;">
+        Kopfschmerzen vorhanden
+      </mat-checkbox>
+
+      <mat-form-field appearance="outline" style="width:100%;margin-bottom:12px;">
+        <mat-label>Klientenperspektive (was berichtet der Klient?)</mat-label>
+        <textarea matInput formControlName="klientenPerspektive" rows="3"
+          placeholder="z.B. Patient berichtet ueber Muedigkeit und wenig Wissen ueber Ernaehrung..."></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="width:100%;">
+        <mat-label>Notizen</mat-label>
+        <textarea matInput formControlName="notizen" rows="2"></textarea>
+      </mat-form-field>
+    </form>
+  </div>
+
+  <!-- SCHRITT 1: KOERPER -->
+  <div *ngIf="schritt === 1">
+    <form [formGroup]="koerperForm">
+      <h3>Koerpermessung & BIA</h3>
+
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+        <mat-form-field appearance="outline">
+          <mat-label>Groesse (cm)</mat-label>
+          <input matInput type="number" step="0.5" formControlName="groesse" (change)="bmiBerechnen()">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Gewicht (kg)</mat-label>
+          <input matInput type="number" step="0.1" formControlName="gewicht" (change)="bmiBerechnen()">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>BMI (auto)</mat-label>
+          <input matInput formControlName="bmi" readonly style="background:#f9f9f9">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>BMI-Perzentile</mat-label>
+          <input matInput formControlName="bmiPerzentile">
+        </mat-form-field>
+      </div>
+
+      <h4>Blutdruck</h4>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+        <mat-form-field appearance="outline">
+          <mat-label>Systolisch (mmHg)</mat-label>
+          <input matInput type="number" formControlName="blutdruckSystolisch">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Diastolisch (mmHg)</mat-label>
+          <input matInput type="number" formControlName="blutdruckDiastolisch">
+        </mat-form-field>
+      </div>
+
+      <h4>BIA-Messung</h4>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+        <mat-form-field appearance="outline">
+          <mat-label>Phasenwinkel (Grad)</mat-label>
+          <input matInput type="number" step="0.1" formControlName="phasenwinkel">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Fettmasse (kg)</mat-label>
+          <input matInput type="number" step="0.1" formControlName="fettmasse">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>FM Ideal Min (kg)</mat-label>
+          <input matInput type="number" step="0.1" formControlName="fettmasseIdealMin">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>FM Ideal Max (kg)</mat-label>
+          <input matInput type="number" step="0.1" formControlName="fettmasseIdealMax">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Koerperzellmasse (kg)</mat-label>
+          <input matInput type="number" step="0.1" formControlName="koerperzellmasse">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>KZM Ideal Min</mat-label>
+          <input matInput type="number" step="0.1" formControlName="koerperzellmasseIdealMin">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>KZM Ideal Max</mat-label>
+          <input matInput type="number" step="0.1" formControlName="koerperzellmasseIdealMax">
+        </mat-form-field>
+      </div>
+
+      <mat-checkbox formControlName="muskelmasseHoch" style="margin-bottom:16px;">
+        Hohe Muskelmasse (bei BMI-Klassifizierung beruecksichtigen)
+      </mat-checkbox>
+
+      <mat-form-field appearance="outline" style="width:100%;">
+        <mat-label>Laborparameter</mat-label>
+        <mat-select formControlName="laborparameterStatus">
+          <mat-option *ngFor="let o of laborOpt" [value]="o">{{ o }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </form>
+  </div>
+
+  <!-- SCHRITT 2: ERNAEHRUNG -->
+  <div *ngIf="schritt === 2">
+    <form [formGroup]="ernaehrungForm">
+      <h3>Ernaehrungsassessment</h3>
+
+      <h4>Energiebedarf (lt. BIA + PAL)</h4>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+        <mat-form-field appearance="outline">
+          <mat-label>PAL-Wert</mat-label>
+          <mat-select formControlName="palWert">
+            <mat-option *ngFor="let o of palOpt" [value]="o">{{ o }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Energiebedarf (kcal/d)</mat-label>
+          <input matInput type="number" formControlName="energiebedarfKcal">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Eiweiss (g/d)</mat-label>
+          <input matInput type="number" step="0.1" formControlName="eiweissbedarfG">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Fett (g/d)</mat-label>
+          <input matInput type="number" step="0.1" formControlName="fettbedarfG">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Kohlenhydrate (g/d)</mat-label>
+          <input matInput type="number" step="0.1" formControlName="kohlenhydratbedarfG">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Ballaststoffe min. (g/d)</mat-label>
+          <input matInput type="number" formControlName="ballaststoffbedarfG">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Fluessigkeit (ml/d)</mat-label>
+          <input matInput type="number" formControlName="fluessigkeitsbedarfMl">
+        </mat-form-field>
+      </div>
+
+      <h4>Ist-Aufnahme (24h-Recall)</h4>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px;">
+        <mat-form-field appearance="outline">
+          <mat-label>Kalorienaufnahme (kcal)</mat-label>
+          <input matInput type="number" formControlName="kalorienaufnahme">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Fettaufnahme (g)</mat-label>
+          <input matInput type="number" formControlName="fettaufnahme">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Kohlenhydrate (g)</mat-label>
+          <input matInput type="number" formControlName="kohlenhydrate">
+        </mat-form-field>
+      </div>
+
+      <div *ngIf="ernaehrungForm.value.kalorienaufnahme && ernaehrungForm.value.energiebedarfKcal"
+           style="background:#fff3cd;padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:14px;">
+        Energie-Abweichung: <strong>{{ abweichung(ernaehrungForm.value.kalorienaufnahme, ernaehrungForm.value.energiebedarfKcal) }}</strong>
+        &nbsp;|&nbsp;
+        Fett-Abweichung: <strong>{{ abweichung(ernaehrungForm.value.fettaufnahme, ernaehrungForm.value.fettbedarfG) }}</strong>
+      </div>
+
+      <h4>Ernaehrungsverhalten</h4>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+        <mat-form-field appearance="outline">
+          <mat-label>Zuckergetraenke / Energydrinks</mat-label>
+          <mat-select formControlName="zuckergetraenke">
+            <mat-option *ngFor="let o of zuckerOpt" [value]="o">{{ o }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Alkohol</mat-label>
+          <mat-select formControlName="alkoholKonsum">
+            <mat-option *ngFor="let o of alkoholOpt" [value]="o">{{ o }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Fertigprodukte</mat-label>
+          <mat-select formControlName="fertigprodukteKonsum">
+            <mat-option *ngFor="let o of fertigOpt" [value]="o">{{ o }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Suesswaren & Chips</mat-label>
+          <mat-select formControlName="suesswarenKonsum">
+            <mat-option *ngFor="let o of suessOpt" [value]="o">{{ o }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div style="display:flex;gap:24px;margin-bottom:16px;">
+        <mat-checkbox formControlName="kochbereitschaft">Bereitschaft zum Kochen</mat-checkbox>
+        <mat-checkbox formControlName="baecktGerne">Baeckt gerne</mat-checkbox>
+      </div>
+
+      <mat-form-field appearance="outline" style="width:100%;">
+        <mat-label>Notizen</mat-label>
+        <textarea matInput formControlName="notizen" rows="2"></textarea>
+      </mat-form-field>
+    </form>
+  </div>
+
+  <!-- SCHRITT 3: DIAGNOSE -->
+  <div *ngIf="schritt === 3">
+    <form [formGroup]="diagnoseForm">
+      <h3>Diaetologische Diagnose (PES-Schema)</h3>
+
+      <mat-form-field appearance="outline" style="width:100%;margin-bottom:12px;">
+        <mat-label>Problem (P)</mat-label>
+        <mat-select formControlName="problem">
+          <mat-option *ngFor="let o of diagnoseOpt" [value]="o">{{ o }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="width:100%;margin-bottom:12px;">
+        <mat-label>Ursache (E)</mat-label>
+        <textarea matInput formControlName="ursache" rows="3"
+          placeholder="z.B. Mangel an frisch zubereiteten Speisen, hoher Konsum von Energydrinks..."></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="width:100%;margin-bottom:12px;">
+        <mat-label>Symptom / Anzeichen (S)</mat-label>
+        <textarea matInput formControlName="symptom" rows="2"
+          placeholder="z.B. 43,8 kg Fettmasse, Energieaufnahme 32% ueber Bedarf..."></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="width:100%;margin-bottom:12px;">
+        <mat-label>Foerderfaktoren</mat-label>
+        <textarea matInput formControlName="foerderfaktoren" rows="2"
+          placeholder="z.B. hohe Motivation, Unterstuetzung durch Sozialarbeiterin..."></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="width:100%;margin-bottom:12px;">
+        <mat-label>Barrieren</mat-label>
+        <textarea matInput formControlName="barrieren" rows="2"
+          placeholder="z.B. lebt alleine, keine familiaere Unterstuetzung..."></textarea>
+      </mat-form-field>
+    </form>
+  </div>
+
+  <!-- SCHRITT 4: KI EMPFEHLUNG -->
+<div *ngIf="schritt === 4">
+  <h3>KI-gestützte Ernährungsempfehlung</h3>
+  
+  <div *ngIf="loading" style="text-align: center; padding: 50px;">
+    <p>KI analysiert die Daten...</p>
+  </div>
+  
+  <div *ngIf="kiAdvice && !loading" class="ki-card">
+    <div class="ki-header">
+      <mat-icon>psychology</mat-icon>
+      <h4>Basierend auf Ihren Assessment-Daten empfiehlt die KI:</h4>
+    </div>
+    <div class="ki-content">
+      <pre>{{ kiAdvice }}</pre>
+    </div>
+    <div class="ki-footer">
+      <small>⚠️ Diese Empfehlung wurde KI-generiert und ersetzt keine ärztliche Beratung.</small>
+    </div>
+    <button mat-stroked-button color="primary" (click)="generateAIAdvice()" [disabled]="loading">
+      <mat-icon>refresh</mat-icon> Neue Empfehlung
+    </button>
+  </div>
+</div>
+
+  <!-- Navigation -->
+  <div style="display:flex;gap:12px;margin-top:24px;">
+    <button mat-button (click)="zurueck()" [disabled]="schritt === 0">
+      Zurueck
+    </button>
+    <button mat-raised-button color="primary" (click)="weiter()">
+      {{ schritt < 3 ? 'Speichern & weiter' : 'Assessment abschliessen' }}
+    </button>
+    <button mat-stroked-button routerLink="/">Abbrechen</button>
+  </div>
+
+</div>

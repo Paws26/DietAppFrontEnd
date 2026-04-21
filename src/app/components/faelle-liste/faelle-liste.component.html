@@ -1,0 +1,54 @@
+<div style="padding:24px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <h2 style="margin:0;">Patientenfaelle</h2>
+    <button mat-raised-button color="primary" routerLink="/neu">+ Neuer Fall</button>
+  </div>
+
+  <p *ngIf="faelle.length === 0" style="color:#666;">Noch keine Faelle vorhanden.</p>
+
+  <table mat-table [dataSource]="faelle" style="width:100%;" *ngIf="faelle.length > 0">
+
+    <ng-container matColumnDef="anonymerCode">
+      <th mat-header-cell *matHeaderCellDef>Code</th>
+      <td mat-cell *matCellDef="let f">
+        <code style="background:#eeedfe;color:#3c3489;padding:2px 8px;border-radius:4px;">
+          {{ f.anonymerCode }}
+        </code>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="erstelltVon">
+      <th mat-header-cell *matHeaderCellDef>Diaetologin</th>
+      <td mat-cell *matCellDef="let f">{{ f.erstelltVon }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="alterJahre">
+      <th mat-header-cell *matHeaderCellDef>Alter</th>
+      <td mat-cell *matCellDef="let f">{{ f.alterJahre }} J.</td>
+    </ng-container>
+
+    <ng-container matColumnDef="geschlecht">
+      <th mat-header-cell *matHeaderCellDef>Geschlecht</th>
+      <td mat-cell *matCellDef="let f">{{ f.geschlecht }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="erstelltAm">
+      <th mat-header-cell *matHeaderCellDef>Datum</th>
+      <td mat-cell *matCellDef="let f">{{ f.erstelltAm | date:'dd.MM.yyyy HH:mm' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="aktion">
+      <th mat-header-cell *matHeaderCellDef>Aktion</th>
+      <td mat-cell *matCellDef="let f">
+        <button mat-stroked-button color="primary" [routerLink]="['/assessment', f.id]">
+          Assessment
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="spalten"></tr>
+    <tr mat-row *matRowDef="let row; columns: spalten;"
+        style="cursor:pointer;"
+        [routerLink]="['/assessment', row.id]"></tr>
+  </table>
+</div>
