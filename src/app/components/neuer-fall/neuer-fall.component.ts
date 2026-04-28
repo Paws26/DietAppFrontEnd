@@ -14,16 +14,13 @@ export class NeuerFallComponent {
   laedt = false;
   geschlechter = ['maennlich', 'weiblich', 'divers'];
 
-  constructor(
-    private fb: FormBuilder,
-    private api: ApiService,
-    private router: Router,
-    private snack: MatSnackBar
-  ) {
+  constructor(private fb: FormBuilder, private api: ApiService,
+              private router: Router, private snack: MatSnackBar) {
     this.form = this.fb.group({
-      erstelltVon: ['', Validators.required],
-      alterJahre:  [null],
-      geschlecht:  ['']
+      vorname:    ['', Validators.required],
+      nachname:   ['', Validators.required],
+      alterJahre: [null, Validators.required],
+      geschlecht: ['']
     });
   }
 
@@ -32,13 +29,10 @@ export class NeuerFallComponent {
     this.laedt = true;
     this.api.neuerFall(this.form.value).subscribe({
       next: fall => {
-        this.snack.open('Fall angelegt! Code: ' + fall.anonymerCode, 'OK', { duration: 5000 });
+        this.snack.open(fall.vorname + ' ' + fall.nachname + ' angelegt!', 'OK', { duration: 4000 });
         this.router.navigate(['/assessment', fall.id]);
       },
-      error: () => {
-        this.snack.open('Fehler beim Speichern!', 'OK', { duration: 3000 });
-        this.laedt = false;
-      }
+      error: () => { this.snack.open('Fehler!', 'OK', { duration: 3000 }); this.laedt = false; }
     });
   }
 }

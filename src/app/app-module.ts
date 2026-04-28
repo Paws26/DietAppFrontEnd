@@ -21,6 +21,8 @@ import { MatSnackBarModule } from   '@angular/material/snack-bar';
 import { FaelleListeComponent } from './components/faelle-liste/faelle-liste';
 import { NeuerFallComponent } from './components/neuer-fall/neuer-fall.component';
 import { AssessmentComponent } from './components/assessment/assessment.component';
+import { MonitoringComponent } from './components/monitoring/monitoring.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 
 @NgModule({
@@ -28,7 +30,8 @@ import { AssessmentComponent } from './components/assessment/assessment.componen
     App,
     FaelleListeComponent,
     NeuerFallComponent,
-    AssessmentComponent  
+    AssessmentComponent ,
+    MonitoringComponent
   ],
   imports: [
     BrowserModule,
@@ -38,6 +41,7 @@ import { AssessmentComponent } from './components/assessment/assessment.componen
     BrowserAnimationsModule,
     MatTableModule,
     MatButtonModule,
+    MatProgressSpinnerModule,
     MatInputModule,
     MatFormFieldModule,
     MatSelectModule,

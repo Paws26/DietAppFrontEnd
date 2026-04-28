@@ -1,0 +1,167 @@
+<div style="padding: 24px; max-width: 1000px; margin: 0 auto;">
+
+  <!-- Header -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <h2 style="margin: 0; color: #333;">📊 Monitoring</h2>
+      <p style="margin: 4px 0 0; color: #888; font-size: 13px;">
+        Fall-ID: <code style="background: #f5f5f5; padding: 2px 6px; border-radius: 4px;">{{ fallId }}</code>
+      </p>
+    </div>
+    <button mat-button [routerLink]="['/assessment', fallId]" style="color: #667eea;">
+      ← Zum Assessment
+    </button>
+  </div>
+
+  <!-- Fälligkeits-Anzeige - neutraler -->
+  <div *ngIf="status" style="margin-bottom: 24px; padding: 16px 20px; border-radius: 8px; background: #f8f8f8; border-left: 4px solid #667eea;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <strong style="color: #333; font-size: 15px;">
+          {{ status.faellig ? '⚠️ Monitoring jetzt fällig' : '📅 Nächstes Monitoring in ' + status.tageVerbleibend + ' Tagen' }}
+        </strong>
+        <div style="margin-top: 6px; font-size: 13px; color: #666;">
+          📆 Nächstes Datum: {{ status.naechstesDatum }}
+          <span *ngIf="status.letzteMessung" style="margin-left: 16px;">📈 Letzte Messung: {{ status.letzteMessung }}</span>
+        </div>
+      </div>
+      <div style="font-size: 12px; color: #888; background: #fff; padding: 4px 12px; border-radius: 16px;">
+        Intervall: alle 14 Tage
+      </div>
+    </div>
+  </div>
+
+  <!-- Formular - kompakter -->
+  <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 32px; overflow: hidden;">
+    <div style="background: #fafafa; padding: 16px 24px; border-bottom: 1px solid #e0e0e0;">
+      <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: #333;">📝 Neue Messung erfassen</h3>
+    </div>
+    <div style="padding: 24px;">
+      <form [formGroup]="form" (ngSubmit)="speichern()">
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
+          <mat-form-field appearance="outline">
+            <mat-label>Datum</mat-label>
+            <input matInput type="date" formControlName="datum">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Gewicht (kg)</mat-label>
+            <input matInput type="number" step="0.1" formControlName="gewicht">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Fettmasse (kg)</mat-label>
+            <input matInput type="number" step="0.1" formControlName="fettmasse">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Kalorienaufnahme (kcal)</mat-label>
+            <input matInput type="number" formControlName="kalorienaufnahme">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Fettaufnahme (g)</mat-label>
+            <input matInput type="number" step="0.1" formControlName="fettaufnahme">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Zielerreichung</mat-label>
+            <mat-select formControlName="zielerreichung">
+              <mat-option *ngFor="let o of zielerreichungOpt" [value]="o">{{ o }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 16px;">
+          <mat-label>Fördernde Faktoren</mat-label>
+          <textarea matInput formControlName="foerderndefaktoren" rows="2"
+            placeholder="z.B. Einhalten des Ernährungsplans, Gruppendynamik..."></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 16px;">
+          <mat-label>Hemmende Faktoren</mat-label>
+          <textarea matInput formControlName="hemmendefaktoren" rows="2"
+            placeholder="z.B. Naschen von Kollegen, Stress..."></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 16px;">
+          <mat-label>Notizen</mat-label>
+          <textarea matInput formControlName="notizen" rows="2"></textarea>
+        </mat-form-field>
+
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+          <button mat-button type="button" (click)="form.reset()">Zurücksetzen</button>
+          <button mat-raised-button type="submit" [disabled]="form.invalid || speichert" style="background: #1976d2; color: white;">
+            {{ speichert ? 'Wird gespeichert...' : '💾 Messung speichern' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Verlaufstabelle - verbessert -->
+  <h3 style="color: #333; margin-bottom: 16px; font-size: 18px;">📋 Verlauf</h3>
+  
+  <div *ngIf="verlauf.length === 0" style="text-align: center; padding: 48px; background: #fafafa; border-radius: 12px; color: #888;">
+    📭 Noch keine Messungen vorhanden. Erfassen Sie die erste Messung oben.
+  </div>
+
+  <div *ngIf="verlauf.length > 0" style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+      <thead>
+        <tr style="background: #f5f5f5; border-bottom: 2px solid #e0e0e0;">
+          <th style="padding: 12px; text-align: left; font-weight: 600;">Datum</th>
+          <th style="padding: 12px; text-align: left; font-weight: 600;">Gewicht (kg)</th>
+          <th style="padding: 12px; text-align: left; font-weight: 600;">Fettmasse (kg)</th>
+          <th style="padding: 12px; text-align: left; font-weight: 600;">Kalorien (kcal)</th>
+          <th style="padding: 12px; text-align: left; font-weight: 600;">Ziel erreicht</th>
+          <th style="padding: 12px; text-align: left; font-weight: 600;">Notizen</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let m of verlauf; let i = index" style="border-bottom: 1px solid #e0e0e0; transition: background 0.2s;" (mouseenter)="hoverRow = i" (mouseleave)="hoverRow = null" [style.background]="hoverRow === i ? '#f9f9f9' : 'white'">
+          <td style="padding: 12px; vertical-align: top;">{{ m.datum }}</td>
+          <td style="padding: 12px; vertical-align: top;">
+            {{ m.gewicht }}
+            <span *ngIf="i < verlauf.length-1 && m.gewicht && verlauf[i+1].gewicht"
+                  [style.color]="m.gewicht < verlauf[i+1].gewicht ? '#27ae60' : '#e74c3c'"
+                  style="font-size: 12px; margin-left: 6px;">
+              {{ aenderung(m.gewicht, verlauf[i+1].gewicht) }}
+            </span>
+          </td>
+          <td style="padding: 12px; vertical-align: top;">{{ m.fettmasse }}</td>
+          <td style="padding: 12px; vertical-align: top;">{{ m.kalorienaufnahme }}</td>
+          <td style="padding: 12px; vertical-align: top;">
+            <span [style.color]="m.zielerreichung === 'ja' ? '#27ae60' : (m.zielerreichung === 'nein' ? '#e74c3c' : '#f39c12')"
+                  [style.fontWeight]="600">
+              {{ m.zielerreichung === 'ja' ? '✓' : (m.zielerreichung === 'nein' ? '✗' : '●') }} {{ m.zielerreichung }}
+            </span>
+          </td>
+          <td style="padding: 12px; vertical-align: top; color: #666; font-size: 12px; max-width: 200px;">{{ m.notizen }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Statistiken -->
+  <div *ngIf="verlauf.length > 0" style="margin-top: 24px; padding: 16px; background: #fafafa; border-radius: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+    <div>
+      <div style="font-size: 12px; color: #888;">Gesamtgewicht</div>
+      <div style="font-size: 20px; font-weight: 600;">{{ verlauf[0].gewicht }} kg</div>
+      <div style="font-size: 12px; color: #666;">Erste Messung</div>
+    </div>
+    <div>
+      <div style="font-size: 12px; color: #888;">Aktuelles Gewicht</div>
+      <div style="font-size: 20px; font-weight: 600;">{{ verlauf[verlauf.length-1].gewicht }} kg</div>
+      <div style="font-size: 12px;" [style.color]="verlauf[verlauf.length-1].gewicht < verlauf[0].gewicht ? '#27ae60' : '#e74c3c'">
+        {{ verlauf[verlauf.length-1].gewicht < verlauf[0].gewicht ? '↓' : '↑' }} {{ abs(verlauf[verlauf.length-1].gewicht - verlauf[0].gewicht) }} kg
+      </div>
+    </div>
+    <div>
+      <div style="font-size: 12px; color: #888;">Messungen gesamt</div>
+      <div style="font-size: 20px; font-weight: 600;">{{ verlauf.length }}</div>
+    </div>
+  </div>
+
+</div>
