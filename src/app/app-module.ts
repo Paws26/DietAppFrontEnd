@@ -17,6 +17,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBarModule } from   '@angular/material/snack-bar';
 import { FaelleListeComponent } from './components/faelle-liste/faelle-liste';
 import { NeuerFallComponent } from './components/neuer-fall/neuer-fall.component';
@@ -41,6 +42,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     BrowserAnimationsModule,
     MatTableModule,
     MatButtonModule,
+    MatTooltipModule,
     MatProgressSpinnerModule,
     MatInputModule,
     MatFormFieldModule,
