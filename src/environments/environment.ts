@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8081/api'
+  apiUrl: 'https://angular-backend-4y86.onrender.com/api'
 };
