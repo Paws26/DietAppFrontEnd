@@ -1,340 +1,407 @@
-<div style="padding: 24px; max-width: 1000px; margin: 0 auto;">
+<div style="padding:24px 20px;">
 
-  <h2 style="margin-top: 0; margin-bottom: 8px; color: #333;">Assessment</h2>
-  <p style="color: #888; font-size: 13px; margin-bottom: 24px;">
-    Klient: <strong>{{ patient?.vorname }} {{ patient?.nachname }}</strong>
-  </p>
-
-  <!-- EINFACHE SCHRITT-ANZEIGE -->
-  <div style="display: flex; gap: 20px; margin-bottom: 32px; flex-wrap: wrap; border-bottom: 1px solid #e0e0e0; padding-bottom: 15px;">
-    <span *ngFor="let s of schritte; let i = index"
-          (click)="goToStep(i)"
-          style="cursor: pointer; font-size: 13px;"
-          [style.fontWeight]="schritt === i ? '600' : '400'"
-          [style.color]="schritt === i ? '#000' : '#999'">
-      {{ i+1 }}. {{ s }}
-    </span>
+  <!-- Header -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+    <div>
+      <a routerLink="/" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#64748b;text-decoration:none;margin-bottom:10px;cursor:pointer;">← Klientenübersicht</a>
+      <h1 style="font-size:22px;font-weight:600;color:#1a1a2e;margin:0 0 4px 0;">Assessment</h1>
+      <p style="font-size:13px;color:#64748b;margin:0;" *ngIf="patient">
+        {{ patient.vorname }} {{ patient.nachname }}
+        <span *ngIf="patient.alterJahre"> &nbsp;·&nbsp; {{ patient.alterJahre }} Jahre</span>
+        <span *ngIf="patient.geschlecht"> &nbsp;·&nbsp; {{ patient.geschlecht }}</span>
+      </p>
+    </div>
+    <div *ngIf="loading" style="display:flex;align-items:center;gap:8px;color:#64748b;font-size:13px;margin-top:8px;">
+      <div style="width:16px;height:16px;border:2px solid #e2e8f0;border-top-color:#2563eb;border-radius:50%;animation:spin 0.7s linear infinite;"></div>
+      Daten werden geladen…
+    </div>
   </div>
 
-  <!-- SCHRITT 0: ALLGEMEIN -->
+  <!-- Tab bar -->
+  <div style="display:flex;gap:4px;border-bottom:1px solid #e2e8f0;margin-bottom:28px;overflow-x:auto;">
+    <button *ngFor="let s of schritte; let i = index"
+            type="button"
+            (click)="goToStep(i)"
+            style="padding:10px 16px;font-size:13px;background:none;border:none;cursor:pointer;
+                   white-space:nowrap;flex-shrink:0;border-bottom:2px solid transparent;margin-bottom:-1px;
+                   transition:color 0.15s,border-color 0.15s;"
+            [style.color]="schritt === i ? '#2563eb' : '#64748b'"
+            [style.fontWeight]="schritt === i ? '500' : '400'"
+            [style.borderBottomColor]="schritt === i ? '#2563eb' : 'transparent'">
+      {{ s }}
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- SCHRITT 0: ALLGEMEIN                                       -->
+  <!-- ══════════════════════════════════════════════════════════ -->
   <div *ngIf="schritt === 0">
     <form [formGroup]="allgemeinForm">
-      <h3 style="color: #333; margin-bottom: 20px; font-size: 18px;">Allgemeines Assessment</h3>
 
-      <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;">
-        <mat-form-field appearance="outline" style="flex: 1; min-width: 150px;">
-          <mat-label>Müdigkeit</mat-label>
-          <mat-select formControlName="muedigkeitLevel">
-            <mat-option *ngFor="let o of muedigkeitOpt" [value]="o">{{ o }}</mat-option>
-          </mat-select>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px 22px;margin-bottom:16px;">
+        <p style="font-size:12.5px;font-weight:600;color:#1a1a2e;margin:0 0 14px 0;">Allgemeines Befinden</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0 16px;">
+          <mat-form-field appearance="outline">
+            <mat-label>Müdigkeit</mat-label>
+            <mat-select formControlName="muedigkeitLevel">
+              <mat-option *ngFor="let o of muedigkeitOpt" [value]="o">{{ o }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Ernährungswissen</mat-label>
+            <mat-select formControlName="wissenErnaehrungLevel">
+              <mat-option *ngFor="let o of wissenOpt" [value]="o">{{ o }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Motivation</mat-label>
+            <mat-select formControlName="motivationLevel">
+              <mat-option *ngFor="let o of motivationOpt" [value]="o">{{ o }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <mat-checkbox formControlName="kopfschmerzen" style="display:block;margin-bottom:4px;font-size:13.5px;">
+          Kopfschmerzen vorhanden
+        </mat-checkbox>
+      </div>
+
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px 22px;margin-bottom:16px;">
+        <p style="font-size:12.5px;font-weight:600;color:#1a1a2e;margin:0 0 14px 0;">Klientenperspektive</p>
+        <mat-form-field appearance="outline" style="width:100%;">
+          <mat-label>Was berichtet der Klient?</mat-label>
+          <textarea matInput formControlName="klientenPerspektive" rows="3"
+            placeholder="z.B. Patient berichtet über Müdigkeit, wenig Kenntnisse über ausgewogene Ernährung…"></textarea>
         </mat-form-field>
-        <mat-form-field appearance="outline" style="flex: 1; min-width: 150px;">
-          <mat-label>Wissen Ernährung</mat-label>
-          <mat-select formControlName="wissenErnaehrungLevel">
-            <mat-option *ngFor="let o of wissenOpt" [value]="o">{{ o }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" style="flex: 1; min-width: 150px;">
-          <mat-label>Motivation</mat-label>
-          <mat-select formControlName="motivationLevel">
-            <mat-option *ngFor="let o of motivationOpt" [value]="o">{{ o }}</mat-option>
-          </mat-select>
+        <mat-form-field appearance="outline" style="width:100%;">
+          <mat-label>Notizen</mat-label>
+          <textarea matInput formControlName="notizen" rows="2"></textarea>
         </mat-form-field>
       </div>
 
-      <mat-checkbox formControlName="kopfschmerzen" style="margin-bottom: 20px; display: block;">
-        Kopfschmerzen vorhanden
-      </mat-checkbox>
-
-      <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 16px;">
-        <mat-label>Klientenperspektive (was berichtet der Klient?)</mat-label>
-        <textarea matInput formControlName="klientenPerspektive" rows="3"
-          placeholder="z.B. Patient berichtet über Müdigkeit und wenig Wissen über Ernährung..."></textarea>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" style="width: 100%;">
-        <mat-label>Notizen</mat-label>
-        <textarea matInput formControlName="notizen" rows="2"></textarea>
-      </mat-form-field>
     </form>
   </div>
 
-  <!-- SCHRITT 1: KOERPER -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- SCHRITT 1: KÖRPER                                          -->
+  <!-- ══════════════════════════════════════════════════════════ -->
   <div *ngIf="schritt === 1">
     <form [formGroup]="koerperForm">
-      <h3 style="color: #333; margin-bottom: 20px; font-size: 18px;">Körpermessung & BIA</h3>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px;">
-        <mat-form-field appearance="outline">
-          <mat-label>Größe (cm)</mat-label>
-          <input matInput type="number" step="0.5" formControlName="groesse" (change)="bmiBerechnen()">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Gewicht (kg)</mat-label>
-          <input matInput type="number" step="0.1" formControlName="gewicht" (change)="bmiBerechnen()">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>BMI (auto)</mat-label>
-          <input matInput formControlName="bmi" readonly style="background: #f9f9f9">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>BMI-Perzentile</mat-label>
-          <input matInput formControlName="bmiPerzentile">
-        </mat-form-field>
+      <div *ngIf="koerperForm.value.bmi" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px;min-width:120px;">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px;font-weight:500;">BMI</div>
+          <div style="font-size:22px;font-weight:300;color:#1a1a2e;margin-top:3px;">{{ koerperForm.value.bmi }} <span style="font-size:11px;color:#94a3b8;">kg/m²</span></div>
+        </div>
+        <div *ngIf="koerperForm.value.fettmasse" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px;min-width:120px;">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px;font-weight:500;">Fettmasse</div>
+          <div style="font-size:22px;font-weight:300;color:#1a1a2e;margin-top:3px;">{{ koerperForm.value.fettmasse }} <span style="font-size:11px;color:#94a3b8;">kg</span></div>
+        </div>
+        <div *ngIf="koerperForm.value.blutdruckSystolisch" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px;min-width:120px;">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px;font-weight:500;">Blutdruck</div>
+          <div style="font-size:22px;font-weight:300;color:#1a1a2e;margin-top:3px;">{{ koerperForm.value.blutdruckSystolisch }}<span style="font-size:11px;color:#94a3b8;">/{{ koerperForm.value.blutdruckDiastolisch }}</span></div>
+        </div>
+        <div *ngIf="koerperForm.value.phasenwinkel" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px;min-width:120px;">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px;font-weight:500;">Phasenwinkel</div>
+          <div style="font-size:22px;font-weight:300;color:#1a1a2e;margin-top:3px;">{{ koerperForm.value.phasenwinkel }} <span style="font-size:11px;color:#94a3b8;">°</span></div>
+        </div>
       </div>
 
-      <h4 style="color: #555; margin: 20px 0 12px 0; font-size: 15px;">Blutdruck</h4>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px;">
-        <mat-form-field appearance="outline">
-          <mat-label>Systolisch (mmHg)</mat-label>
-          <input matInput type="number" formControlName="blutdruckSystolisch">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Diastolisch (mmHg)</mat-label>
-          <input matInput type="number" formControlName="blutdruckDiastolisch">
-        </mat-form-field>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px 22px;margin-bottom:16px;">
+        <p style="font-size:12.5px;font-weight:600;color:#1a1a2e;margin:0 0 14px 0;">Anthropometrie</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0 16px;">
+          <mat-form-field appearance="outline"><mat-label>Größe (cm)</mat-label><input matInput type="number" step="0.5" formControlName="groesse" (change)="bmiBerechnen()"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Gewicht (kg)</mat-label><input matInput type="number" step="0.1" formControlName="gewicht" (change)="bmiBerechnen()"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>BMI (auto)</mat-label><input matInput formControlName="bmi" readonly></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>BMI-Perzentile</mat-label><input matInput formControlName="bmiPerzentile"></mat-form-field>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0 16px;">
+          <mat-form-field appearance="outline"><mat-label>Systolisch (mmHg)</mat-label><input matInput type="number" formControlName="blutdruckSystolisch"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Diastolisch (mmHg)</mat-label><input matInput type="number" formControlName="blutdruckDiastolisch"></mat-form-field>
+        </div>
       </div>
 
-      <h4 style="color: #555; margin: 20px 0 12px 0; font-size: 15px;">BIA-Messung</h4>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px;">
-        <mat-form-field appearance="outline">
-          <mat-label>Phasenwinkel (Grad)</mat-label>
-          <input matInput type="number" step="0.1" formControlName="phasenwinkel">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Fettmasse (kg)</mat-label>
-          <input matInput type="number" step="0.1" formControlName="fettmasse">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>FM Ideal Min (kg)</mat-label>
-          <input matInput type="number" step="0.1" formControlName="fettmasseIdealMin">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>FM Ideal Max (kg)</mat-label>
-          <input matInput type="number" step="0.2" formControlName="fettmasseIdealMax">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Körperzellmasse (kg)</mat-label>
-          <input matInput type="number" step="0.1" formControlName="koerperzellmasse">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>KZM Ideal Min</mat-label>
-          <input matInput type="number" step="0.2" formControlName="koerperzellmasseIdealMin">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>KZM Ideal Max</mat-label>
-          <input matInput type="number" step="0.2" formControlName="koerperzellmasseIdealMax">
-        </mat-form-field>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px 22px;margin-bottom:16px;">
+        <p style="font-size:12.5px;font-weight:600;color:#1a1a2e;margin:0 0 14px 0;">BIA-Messung</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0 16px;">
+          <mat-form-field appearance="outline"><mat-label>Phasenwinkel (°)</mat-label><input matInput type="number" step="0.1" formControlName="phasenwinkel"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Fettmasse (kg)</mat-label><input matInput type="number" step="0.1" formControlName="fettmasse"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>FM Ideal Min (kg)</mat-label><input matInput type="number" step="0.1" formControlName="fettmasseIdealMin"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>FM Ideal Max (kg)</mat-label><input matInput type="number" step="0.1" formControlName="fettmasseIdealMax"></mat-form-field>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0 16px;">
+          <mat-form-field appearance="outline"><mat-label>Körperzellmasse (kg)</mat-label><input matInput type="number" step="0.1" formControlName="koerperzellmasse"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>KZM Ideal Min</mat-label><input matInput type="number" step="0.1" formControlName="koerperzellmasseIdealMin"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>KZM Ideal Max</mat-label><input matInput type="number" step="0.1" formControlName="koerperzellmasseIdealMax"></mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Laborparameter</mat-label>
+            <mat-select formControlName="laborparameterStatus">
+              <mat-option *ngFor="let o of laborOpt" [value]="o">{{ o }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <mat-checkbox formControlName="muskelmasseHoch" style="font-size:13.5px;">
+          Sehr hohe Muskelmasse (bei BMI-Klassifizierung berücksichtigen)
+        </mat-checkbox>
       </div>
 
-      <mat-checkbox formControlName="muskelmasseHoch" style="margin-bottom: 20px; display: block;">
-        Hohe Muskelmasse (bei BMI-Klassifizierung berücksichtigen)
-      </mat-checkbox>
-
-      <mat-form-field appearance="outline" style="width: 100%;">
-        <mat-label>Laborparameter</mat-label>
-        <mat-select formControlName="laborparameterStatus">
-          <mat-option *ngFor="let o of laborOpt" [value]="o">{{ o }}</mat-option>
-        </mat-select>
-      </mat-form-field>
     </form>
   </div>
 
-  <!-- SCHRITT 2: ERNAEHRUNG -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- SCHRITT 2: ERNÄHRUNG                                       -->
+  <!-- ══════════════════════════════════════════════════════════ -->
   <div *ngIf="schritt === 2">
     <form [formGroup]="ernaehrungForm">
-      <h3 style="color: #333; margin-bottom: 20px; font-size: 18px;">Ernährungsassessment</h3>
 
-      <h4 style="color: #555; margin: 20px 0 12px 0; font-size: 15px;">Energiebedarf (lt. BIA + PAL)</h4>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px;">
-        <mat-form-field appearance="outline">
-          <mat-label>PAL-Wert</mat-label>
-          <mat-select formControlName="palWert">
-            <mat-option *ngFor="let o of palOpt" [value]="o">{{ o }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Energiebedarf (kcal/d)</mat-label>
-          <input matInput type="number" formControlName="energiebedarfKcal">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Eiweiß (g/d)</mat-label>
-          <input matInput type="number" step="0.1" formControlName="eiweissbedarfG">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Fett (g/d)</mat-label>
-          <input matInput type="number" step="0.1" formControlName="fettbedarfG">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Kohlenhydrate (g/d)</mat-label>
-          <input matInput type="number" step="0.1" formControlName="kohlenhydratbedarfG">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Ballaststoffe min. (g/d)</mat-label>
-          <input matInput type="number" formControlName="ballaststoffbedarfG">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Flüssigkeit (ml/d)</mat-label>
-          <input matInput type="number" formControlName="fluessigkeitsbedarfMl">
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px 22px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+          <p style="font-size:12.5px;font-weight:600;color:#1a1a2e;margin:0;">Energiebedarf lt. BIA + PAL</p>
+          <button mat-stroked-button type="button" (click)="energiebedarfBerechnen()" style="font-size:12px;">
+            🧮 Bedarf berechnen
+          </button>
+        </div>
+        <div style="background:#f8fafc;border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:#64748b;">
+          Berechnet Grundumsatz (Harris-Benedict) × PAL aus Größe, Gewicht, Alter und Geschlecht — Makros werden automatisch verteilt (20% Eiweiß / 30% Fett / 50% KH)
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0 16px;">
+          <mat-form-field appearance="outline">
+            <mat-label>PAL-Wert</mat-label>
+            <mat-select formControlName="palWert">
+              <mat-option *ngFor="let o of palOpt" [value]="o">{{ o }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Energiebedarf (kcal/d)</mat-label><input matInput type="number" formControlName="energiebedarfKcal"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Eiweiß (g/d)</mat-label><input matInput type="number" step="0.1" formControlName="eiweissbedarfG"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Fett Bedarf (g/d)</mat-label><input matInput type="number" step="0.1" formControlName="fettbedarfG"></mat-form-field>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0 16px;">
+          <mat-form-field appearance="outline"><mat-label>Kohlenhydrate (g/d)</mat-label><input matInput type="number" step="0.1" formControlName="kohlenhydratbedarfG"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Ballaststoffe min. (g/d)</mat-label><input matInput type="number" formControlName="ballaststoffbedarfG"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Flüssigkeit (ml/d)</mat-label><input matInput type="number" formControlName="fluessigkeitsbedarfMl"></mat-form-field>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px 22px;margin-bottom:16px;">
+        <p style="font-size:12.5px;font-weight:600;color:#1a1a2e;margin:0 0 14px 0;">Ist-Aufnahme (24h-Recall)</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0 16px;">
+          <mat-form-field appearance="outline"><mat-label>Kalorienaufnahme (kcal)</mat-label><input matInput type="number" formControlName="kalorienaufnahme"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Fettaufnahme (g)</mat-label><input matInput type="number" formControlName="fettaufnahme"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Kohlenhydrate (g)</mat-label><input matInput type="number" formControlName="kohlenhydrate"></mat-form-field>
+        </div>
+        <div *ngIf="ernaehrungForm.value.kalorienaufnahme && ernaehrungForm.value.energiebedarfKcal"
+             style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:13px;color:#92400e;display:flex;gap:20px;flex-wrap:wrap;">
+          <span>Energie-Abweichung: <strong>{{ abweichung(ernaehrungForm.value.kalorienaufnahme, ernaehrungForm.value.energiebedarfKcal) }}</strong></span>
+          <span *ngIf="ernaehrungForm.value.fettaufnahme && ernaehrungForm.value.fettbedarfG">
+            Fett-Abweichung: <strong>{{ abweichung(ernaehrungForm.value.fettaufnahme, ernaehrungForm.value.fettbedarfG) }}</strong>
+          </span>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px 22px;margin-bottom:16px;">
+        <p style="font-size:12.5px;font-weight:600;color:#1a1a2e;margin:0 0 14px 0;">Ernährungsverhalten</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0 14px;">
+          <mat-form-field appearance="outline">
+            <mat-label>Zuckergetränke</mat-label>
+            <mat-select formControlName="zuckergetraenke">
+              <mat-option *ngFor="let o of zuckerOpt" [value]="o">{{ o }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Alkohol</mat-label>
+            <mat-select formControlName="alkoholKonsum">
+              <mat-option *ngFor="let o of alkoholOpt" [value]="o">{{ o }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Fertigprodukte</mat-label>
+            <mat-select formControlName="fertigprodukteKonsum">
+              <mat-option *ngFor="let o of fertigOpt" [value]="o">{{ o }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Süßwaren & Chips</mat-label>
+            <mat-select formControlName="suesswarenKonsum">
+              <mat-option *ngFor="let o of suessOpt" [value]="o">{{ o }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div style="display:flex;gap:28px;margin-top:4px;">
+          <mat-checkbox formControlName="kochbereitschaft">Bereitschaft zum Kochen</mat-checkbox>
+          <mat-checkbox formControlName="baecktGerne">Bäckt gerne</mat-checkbox>
+        </div>
+        <mat-form-field appearance="outline" style="width:100%;margin-top:14px;">
+          <mat-label>Notizen</mat-label>
+          <textarea matInput formControlName="notizen" rows="2"></textarea>
         </mat-form-field>
       </div>
 
-      <h4 style="color: #555; margin: 20px 0 12px 0; font-size: 15px;">Ist-Aufnahme (24h-Recall)</h4>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px;">
-        <mat-form-field appearance="outline">
-          <mat-label>Kalorienaufnahme (kcal)</mat-label>
-          <input matInput type="number" formControlName="kalorienaufnahme">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Fettaufnahme (g)</mat-label>
-          <input matInput type="number" formControlName="fettaufnahme">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Kohlenhydrate (g)</mat-label>
-          <input matInput type="number" formControlName="kohlenhydrate">
-        </mat-form-field>
-      </div>
-
-      <div *ngIf="ernaehrungForm.value.kalorienaufnahme && ernaehrungForm.value.energiebedarfKcal"
-           style="background: #fff8e1; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; border-left: 4px solid #ffc107;">
-        Energie-Abweichung: <strong>{{ abweichung(ernaehrungForm.value.kalorienaufnahme, ernaehrungForm.value.energiebedarfKcal) }}</strong>
-        &nbsp;|&nbsp;
-        Fett-Abweichung: <strong>{{ abweichung(ernaehrungForm.value.fettaufnahme, ernaehrungForm.value.fettbedarfG) }}</strong>
-      </div>
-
-      <h4 style="color: #555; margin: 20px 0 12px 0; font-size: 15px;">Ernährungsverhalten</h4>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px;">
-        <mat-form-field appearance="outline">
-          <mat-label>Zuckergetränke / Energydrinks</mat-label>
-          <mat-select formControlName="zuckergetraenke">
-            <mat-option *ngFor="let o of zuckerOpt" [value]="o">{{ o }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Alkohol</mat-label>
-          <mat-select formControlName="alkoholKonsum">
-            <mat-option *ngFor="let o of alkoholOpt" [value]="o">{{ o }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Fertigprodukte</mat-label>
-          <mat-select formControlName="fertigprodukteKonsum">
-            <mat-option *ngFor="let o of fertigOpt" [value]="o">{{ o }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Süßwaren & Chips</mat-label>
-          <mat-select formControlName="suesswarenKonsum">
-            <mat-option *ngFor="let o of suessOpt" [value]="o">{{ o }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <div style="display: flex; gap: 24px; margin-bottom: 20px;">
-        <mat-checkbox formControlName="kochbereitschaft">Bereitschaft zum Kochen</mat-checkbox>
-        <mat-checkbox formControlName="baecktGerne">Bäckt gerne</mat-checkbox>
-      </div>
-
-      <mat-form-field appearance="outline" style="width: 100%;">
-        <mat-label>Notizen</mat-label>
-        <textarea matInput formControlName="notizen" rows="2"></textarea>
-      </mat-form-field>
     </form>
   </div>
 
-  <!-- SCHRITT 3: DIAGNOSE -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- SCHRITT 3: DIAGNOSE                                        -->
+  <!-- ══════════════════════════════════════════════════════════ -->
   <div *ngIf="schritt === 3">
     <form [formGroup]="diagnoseForm">
-      <h3 style="color: #333; margin-bottom: 20px; font-size: 18px;">Diätologische Diagnose (PES-Schema)</h3>
 
-      <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 16px;">
-        <mat-label>Problem (P)</mat-label>
-        <mat-select formControlName="problem">
-          <mat-option *ngFor="let o of diagnoseOpt" [value]="o">{{ o }}</mat-option>
-        </mat-select>
-      </mat-form-field>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px 22px;margin-bottom:16px;">
+        <p style="font-size:12.5px;font-weight:600;color:#1a1a2e;margin:0 0 14px 0;">Diätologische Diagnose — PES-Schema</p>
+        <mat-form-field appearance="outline" style="width:100%;">
+          <mat-label>Problem (P)</mat-label>
+          <mat-select formControlName="problem">
+            <mat-option *ngFor="let o of diagnoseOpt" [value]="o">{{ o }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" style="width:100%;">
+          <mat-label>Ursache (E — Etiology)</mat-label>
+          <textarea matInput formControlName="ursache" rows="3"
+            placeholder="z.B. Mangel an frisch zubereiteten Speisen, bevorzugter Konsum von Convenience-Produkten; 5–7 Energydrinks/d…"></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="outline" style="width:100%;">
+          <mat-label>Symptome / Anzeichen (S)</mat-label>
+          <textarea matInput formControlName="symptom" rows="2"
+            placeholder="z.B. 43,8 kg Fettmasse, Energieaufnahme +32,8%, Fettaufnahme +83,8% über Bedarf…"></textarea>
+        </mat-form-field>
+      </div>
 
-      <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 16px;">
-        <mat-label>Ursache (E)</mat-label>
-        <textarea matInput formControlName="ursache" rows="3"
-          placeholder="z.B. Mangel an frisch zubereiteten Speisen, hoher Konsum von Energydrinks..."></textarea>
-      </mat-form-field>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px 22px;margin-bottom:16px;">
+        <p style="font-size:12.5px;font-weight:600;color:#1a1a2e;margin:0 0 14px 0;">Kontextfaktoren</p>
+        <mat-form-field appearance="outline" style="width:100%;">
+          <mat-label>Förderfaktoren (F)</mat-label>
+          <textarea matInput formControlName="foerderfaktoren" rows="2"
+            placeholder="z.B. Unterstützung durch Sozialarbeiterin; hohe Motivation…"></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="outline" style="width:100%;">
+          <mat-label>Barrieren (B)</mat-label>
+          <textarea matInput formControlName="barrieren" rows="2"
+            placeholder="z.B. mangelnde Unterstützung durch Familie; wohnt alleine…"></textarea>
+        </mat-form-field>
+      </div>
 
-      <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 16px;">
-        <mat-label>Symptom / Anzeichen (S)</mat-label>
-        <textarea matInput formControlName="symptom" rows="2"
-          placeholder="z.B. 43,8 kg Fettmasse, Energieaufnahme 32% über Bedarf..."></textarea>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 16px;">
-        <mat-label>Förderfaktoren</mat-label>
-        <textarea matInput formControlName="foerderfaktoren" rows="2"
-          placeholder="z.B. hohe Motivation, Unterstützung durch Sozialarbeiterin..."></textarea>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 16px;">
-        <mat-label>Barrieren</mat-label>
-        <textarea matInput formControlName="barrieren" rows="2"
-          placeholder="z.B. lebt alleine, keine familiäre Unterstützung..."></textarea>
-      </mat-form-field>
     </form>
   </div>
 
-  <!-- SCHRITT 4: KI EMPFEHLUNG -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- SCHRITT 4: ZIELE                                           -->
+  <!-- ══════════════════════════════════════════════════════════ -->
   <div *ngIf="schritt === 4">
-    <h3 style="color: #333; margin-bottom: 20px; font-size: 18px;">🤖 KI-gestützte Ernährungsempfehlung</h3>
-    
-    <div *ngIf="loading" style="text-align: center; padding: 40px 20px;">
-      <div style="display: inline-block; width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-      <p style="color: #888;">KI analysiert die Daten und erstellt eine individuelle Empfehlung...</p>
-    </div>
-    
-    <div *ngIf="kiAdvice && !loading" style="background: #fafafa; border-radius: 12px; border: 1px solid #e0e0e0; margin-bottom: 24px;">
-      <div style="background: #fff; border-radius: 12px; padding: 24px;">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-          <mat-icon style="color: #667eea;">psychology</mat-icon>
-          <div>
-            <div style="font-size: 16px; font-weight: 600;">Deine personalisierte Empfehlung</div>
-            <div style="font-size: 12px; color: #888;">Basierend auf den eingegebenen Assessment-Daten</div>
-          </div>
+    <form [formGroup]="zieleForm">
+
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#1e40af;">
+        💡 Zielwerte wurden aus den Assessment-Daten vorgeschlagen. Bitte prüfen und bei Bedarf anpassen.
+      </div>
+
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px 22px;margin-bottom:16px;">
+        <p style="font-size:12.5px;font-weight:600;color:#1a1a2e;margin:0 0 14px 0;">Langfristige Behandlungsziele</p>
+        <mat-form-field appearance="outline" style="width:100%;">
+          <mat-label>Langfristiges diaetologisches Behandlungsziel</mat-label>
+          <mat-select formControlName="langfristigesZiel">
+            <mat-option *ngFor="let o of langzielOpt" [value]="o">{{ o }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" style="width:100%;">
+          <mat-label>Diaetologisches Interventionsziel</mat-label>
+          <mat-select formControlName="interventionsziel">
+            <mat-option *ngFor="let o of interventionszielOpt" [value]="o">{{ o }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px 22px;margin-bottom:16px;">
+        <p style="font-size:12.5px;font-weight:600;color:#1a1a2e;margin:0 0 6px 0;">Zielwerte (Outcomes)</p>
+
+        <div style="background:#f8fafc;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12.5px;color:#64748b;">
+          <strong style="color:#1a1a2e;">Referenz aus Assessment:</strong>&nbsp;
+          Energiebedarf: <strong>{{ ernaehrungForm.value.energiebedarfKcal || '—' }} kcal/d</strong> &nbsp;|&nbsp;
+          Fettbedarf: <strong>{{ ernaehrungForm.value.fettbedarfG || '—' }} g/d</strong> &nbsp;|&nbsp;
+          FM Idealmax: <strong>{{ koerperForm.value.fettmasseIdealMax || '—' }} kg</strong>
         </div>
-        
-        <div style="font-size: 14px; line-height: 1.6; max-height: 500px; overflow-y: auto;">
-          <pre style="font-family: inherit; white-space: pre-wrap; word-wrap: break-word; margin: 0; background: #fafafa; padding: 16px; border-radius: 8px; border-left: 3px solid #667eea; font-size: 14px; line-height: 1.6;">{{ kiAdvice }}</pre>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0 16px;">
+          <mat-form-field appearance="outline"><mat-label>Zielgewicht (kg)</mat-label><input matInput type="number" step="0.1" formControlName="zielGewicht" placeholder="z.B. 125.0"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Ziel-Fettmasse (kg)</mat-label><input matInput type="number" step="0.1" formControlName="zielFettmasse" placeholder="z.B. 38.8"></mat-form-field>
         </div>
-        
-        <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #e0e0e0;">
-          <small style="color: #999; display: flex; align-items: center; gap: 8px;">
-            <mat-icon style="font-size: 14px; width: 14px; height: 14px;">info</mat-icon>
-            ⚠️ Diese Empfehlung wurde KI-generiert und ersetzt keine professionelle Beratung.
-          </small>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0 16px;">
+          <mat-form-field appearance="outline"><mat-label>Ziel-Kalorienaufnahme (kcal/d)</mat-label><input matInput type="number" formControlName="zielKalorien"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Ziel-Fettaufnahme (g/d)</mat-label><input matInput type="number" step="0.1" formControlName="zielFettaufnahme"></mat-form-field>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0 16px;">
+          <mat-form-field appearance="outline"><mat-label>Outcomes-Evaluationsdatum</mat-label><input matInput type="date" formControlName="zielDatum"></mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              <mat-option value="offen">offen</mat-option>
+              <mat-option value="in Bearbeitung">in Bearbeitung</mat-option>
+              <mat-option value="erreicht">erreicht</mat-option>
+              <mat-option value="nicht erreicht">nicht erreicht</mat-option>
+            </mat-select>
+          </mat-form-field>
         </div>
       </div>
-    </div>
-    
-    <div style="display: flex; gap: 12px; justify-content: flex-end;">
-      <button mat-stroked-button (click)="generateAIAdvice()" [disabled]="loading" style="border-color: #667eea; color: #667eea;">
-        <mat-icon>refresh</mat-icon> Neue Empfehlung generieren
-      </button>
+
+    </form>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- SCHRITT 5: KI EMPFEHLUNG                                   -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="schritt === 5">
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px 22px;">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+        <div>
+          <p style="font-size:13px;font-weight:600;color:#1a1a2e;margin:0 0 2px 0;">KI-Therapieplan</p>
+          <span style="font-size:12px;color:#64748b;">Basierend auf Assessment + PES-Diagnose + Zielwerten · Groq AI</span>
+        </div>
+        <button mat-stroked-button (click)="generateAIAdvice()" [disabled]="loading" style="font-size:12.5px;">
+          ↻ Neu generieren
+        </button>
+      </div>
+
+      <div *ngIf="loading" style="text-align:center;padding:40px;color:#94a3b8;">
+        <div style="width:28px;height:28px;border:2px solid #e2e8f0;border-top-color:#2563eb;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 12px;"></div>
+        <p style="margin:0;font-size:13.5px;">KI erstellt individuellen Therapieplan…</p>
+      </div>
+
+      <div *ngIf="kiAdvice && !loading"
+           style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:20px 22px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #bbf7d0;">
+          <span style="font-size:15px;">🤖</span>
+          <span style="font-size:13px;font-weight:600;color:#166534;">Individueller Therapieplan</span>
+          <span style="font-size:11px;color:#4ade80;margin-left:auto;">Groq · Mixtral</span>
+        </div>
+        <div style="font-size:13.5px;line-height:1.75;color:#14532d;"
+             [innerHTML]="kiAdviceHtml">
+        </div>
+      </div>
+
+      <div *ngIf="!kiAdvice && !loading"
+           style="text-align:center;padding:40px;color:#94a3b8;font-size:13.5px;">
+        Noch kein Therapieplan. Klicken Sie auf "Neu generieren".
+      </div>
+
+      <p style="font-size:12px;color:#94a3b8;margin-top:14px;padding-top:12px;border-top:1px solid #e2e8f0;">
+        ⚠️ KI-generiert — ersetzt keine professionelle klinische Beurteilung.
+      </p>
     </div>
   </div>
 
-  <!-- Navigation Buttons -->
-  <div style="display: flex; gap: 12px; margin-top: 32px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
-    <button mat-button (click)="zurueck()" [disabled]="schritt === 0" style="color: #666;">
-      Zurück
+  <!-- Navigation -->
+  <div style="display:flex;align-items:center;gap:10px;margin-top:24px;padding-top:18px;border-top:1px solid #e2e8f0;">
+    <button mat-button (click)="zurueck()" [disabled]="schritt === 0" style="color:#64748b;">
+      ← Zurück
     </button>
-    <button mat-raised-button (click)="weiter()" style="background: #1976d2; color: white;">
-      {{ schritt < 4 ? 'Speichern & weiter' : 'Assessment abschliessen' }}
+    <div style="flex:1;"></div>
+    <button mat-button routerLink="/" style="color:#94a3b8;margin-right:4px;">
+      Abbrechen
     </button>
-    <button mat-button routerLink="/" style="color: #999;">Abbrechen</button>
+    <button mat-flat-button color="primary" (click)="weiter()" [disabled]="saving || loading">
+      {{ schritt === 5 ? 'Abschließen' : (saving ? 'Speichern…' : 'Speichern & weiter →') }}
+    </button>
   </div>
 
 </div>
 
 <style>
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
