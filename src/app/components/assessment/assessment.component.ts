@@ -285,16 +285,29 @@ export class AssessmentComponent implements OnInit {
     const fett = Math.round((energiebedarf * 0.30) / 9);
     const kohlenhydrate = Math.round((energiebedarf * 0.50) / 4);
 
+    // Ballaststoffe: DACH-Pauschalwert, unabhängig vom Kalorienbedarf
+    const ballaststoffe = 30;
+
+    // Flüssigkeit: ~35 ml/kg bei Normalgewicht, reduzierter Faktor bei Adipositas
+    // (sonst unrealistisch hohe Trinkmengen bei sehr hohem Körpergewicht)
+    const bmi = parseFloat(this.koerperForm.value.bmi) || null;
+    let mlProKg = 35;
+    if (bmi !== null && bmi >= 30) mlProKg = 26;       // Adipositas: reduzierter Faktor
+    else if (bmi !== null && bmi >= 25) mlProKg = 30;  // Übergewicht: leicht reduziert
+    const fluessigkeit = Math.round((gewicht * mlProKg) / 50) * 50; // auf 50ml runden
+
     this.ernaehrungForm.patchValue({
       energiebedarfKcal: energiebedarf,
       eiweissbedarfG: eiweiss,
       fettbedarfG: fett,
-      kohlenhydratbedarfG: kohlenhydrate
+      kohlenhydratbedarfG: kohlenhydrate,
+      ballaststoffbedarfG: ballaststoffe,
+      fluessigkeitsbedarfMl: fluessigkeit
     });
 
     this.snack.open(
-      `Berechnet: ${energiebedarf} kcal/d (Grundumsatz ${Math.round(grundumsatz)} × PAL ${pal})`,
-      'OK', { duration: 4000 }
+      `Berechnet mit PAL ${pal}: ${energiebedarf} kcal/d. Falscher PAL-Wert? Dropdown ändern und erneut klicken.`,
+      'OK', { duration: 5000 }
     );
   }
 
